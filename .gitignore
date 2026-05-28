@@ -1,0 +1,9 @@
+gitignore id="z8f3x1"
+node_modules
+.env
+.env.production
+Henyway-Backend/.env
+Henyway-Frontend/.env
+dist
+build
+

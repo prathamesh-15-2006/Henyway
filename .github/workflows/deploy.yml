@@ -1,0 +1,51 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create Backend .env
+        run: |
+          echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> ./Henyway-Backend/.env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./Henyway-Backend/.env
+          echo "BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}" >> ./Henyway-Backend/.env
+          echo "EMAIL_FROM=${{ secrets.EMAIL_FROM }}" >> ./Henyway-Backend/.env
+          echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> ./Henyway-Backend/.env
+          echo "FRONTEND_URL_LOCAL=${{ secrets.FRONTEND_URL_LOCAL }}" >> ./Henyway-Backend/.env
+          echo "razorpay_key_id=${{ secrets.RAZORPAY_KEY_ID }}" >> ./Henyway-Backend/.env
+          echo "razorpay_key_secret=${{ secrets.RAZORPAY_KEY_SECRET }}" >> ./Henyway-Backend/.env
+          echo "RAZORPAY_WEBHOOK_SECRET=${{ secrets.RAZORPAY_WEBHOOK_SECRET }}" >> ./Henyway-Backend/.env
+          echo "node_env=production" >> ./Henyway-Backend/.env
+          echo "PORT=5000" >> ./Henyway-Backend/.env
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Backend Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/backend:latest ./Henyway-Backend
+
+      - name: Push Backend Image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
+
+      - name: Build Frontend Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend:latest ./Henyway-Frontend
+
+      - name: Push Frontend Image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+
