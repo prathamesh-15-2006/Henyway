@@ -24,7 +24,6 @@ jobs:
           echo "razorpay_key_id=${{ secrets.RAZORPAY_KEY_ID }}" >> ./Henyway-Backend/.env
           echo "razorpay_key_secret=${{ secrets.RAZORPAY_KEY_SECRET }}" >> ./Henyway-Backend/.env
           echo "RAZORPAY_WEBHOOK_SECRET=${{ secrets.RAZORPAY_WEBHOOK_SECRET }}" >> ./Henyway-Backend/.env
-          echo "node_env=production" >> ./Henyway-Backend/.env
           echo "PORT=5000" >> ./Henyway-Backend/.env
 
       - name: Login to DockerHub
