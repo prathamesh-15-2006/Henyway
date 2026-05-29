@@ -190,8 +190,8 @@ export const forgotPassword = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "15m" });
-    const frontendURL = process.env.NODE_ENV === "production" ? process.env.FRONTEND_URL : process.env.FRONTEND_URL_LOCAL;
-    const resetURL = `${frontendURL}/reset-password/${resetToken}`;
+    const FRONTEND_URL = process.env.NODE_ENV === "production" ? process.env.FRONTEND_URL : process.env.FRONTEND_URL_LOCAL;
+    const resetURL = `${FRONTEND_URL}/reset-password/${resetToken}`;
 
     const html = `
       <h3>Password Reset Request</h3>

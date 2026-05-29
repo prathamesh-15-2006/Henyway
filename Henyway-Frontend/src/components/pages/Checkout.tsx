@@ -8,6 +8,7 @@ import { ShippingAddress } from '../types';
 import { motion } from 'framer-motion';
 import { createOrder, updateOrderAddress, createRazorpayOrder, verifyPayment } from '../../Services/Order-api';
 import { getProfile } from '../../Services/Auth-api';
+import { apiConfig } from '../../Services/api-config';
 
 export const Checkout = () => {
   const { cart, cartTotal, clearCart } = useCart();
@@ -19,7 +20,7 @@ export const Checkout = () => {
   const [orderId, setOrderId] = useState('');
   const [currentOrder, setCurrentOrder] = useState<any>(null);
   const [addressSource, setAddressSource] = useState<'AUTO' | 'MANUAL'>('MANUAL');
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [deliveryType, setDeliveryType] = useState<'ASAP' | 'SCHEDULED'>('ASAP');
@@ -299,7 +300,7 @@ export const Checkout = () => {
     if (!user) return;
 
     // Validate all fields before submission
-    const newErrors: {[key: string]: string} = {};
+    const newErrors: { [key: string]: string } = {};
     newErrors.fullName = validateFullName(formData.fullName.trim());
     newErrors.mobile = validateMobile(formData.mobile.trim());
     newErrors.address = validateAddress(formData.address.trim());
@@ -325,8 +326,7 @@ export const Checkout = () => {
     setLoading(true);
     try {
       // Step 0: Verify Delivery Eligibility
-const API_URL = '/api';
-            // const API_URL = import.meta.env.VITE_API_URL || 'https://henway-backend.onrender.com/api';
+      const API_URL = `${apiConfig.getBaseUrl()}/api`;
 
       const verifyResponse = await fetch(`${API_URL}/delivery/check-pincode`, {
         method: 'POST',
@@ -382,7 +382,7 @@ const API_URL = '/api';
         scheduledDeliverySlot: deliveryType === 'SCHEDULED' ? scheduledTime : 'ASAP',
         scheduledDeliveryDate: deliveryType === 'SCHEDULED' ?
           (deliveryInfo.showTodaySlots ? new Date().toISOString().split('T')[0] :
-           new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]) : new Date().toISOString().split('T')[0],
+            new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]) : new Date().toISOString().split('T')[0],
         // Set initial order status and delivery status to match backend enums
         orderStatus: 'CREATED',
         deliveryStatus: 'PENDING'
@@ -694,9 +694,8 @@ const API_URL = '/api';
                     value={formData.fullName}
                     onChange={handleChange}
                     required
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent ${
-                      errors.fullName ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent ${errors.fullName ? 'border-red-500' : 'border-gray-300'
+                      }`}
                   />
                   {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
                 </div>
@@ -711,9 +710,8 @@ const API_URL = '/api';
                     value={formData.mobile}
                     onChange={handleChange}
                     required
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent ${
-                      errors.mobile ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent ${errors.mobile ? 'border-red-500' : 'border-gray-300'
+                      }`}
                   />
                   {errors.mobile && <p className="text-red-500 text-sm mt-1">{errors.mobile}</p>}
                 </div>
@@ -729,9 +727,8 @@ const API_URL = '/api';
                     onChange={handleChange}
                     required
                     placeholder="House No., Building Name, Street"
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent ${
-                      errors.address ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent ${errors.address ? 'border-red-500' : 'border-gray-300'
+                      }`}
                   />
                   {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
                 </div>
@@ -747,9 +744,8 @@ const API_URL = '/api';
                     onChange={handleChange}
                     disabled
                     required
-                    className={`w-full px-4 py-3 border rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed ${
-                      errors.city ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed ${errors.city ? 'border-red-500' : 'border-gray-300'
+                      }`}
                   />
                   {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
                 </div>
@@ -763,11 +759,10 @@ const API_URL = '/api';
                     name="state"
                     value={formData.state}
                     onChange={handleChange}
-                    
+
                     required
-                    className={`w-full px-4 py-3 border rounded-lg bg-grey-100 text-black-500 cursor-not-allowed ${
-                      errors.state ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg bg-grey-100 text-black-500 cursor-not-allowed ${errors.state ? 'border-red-500' : 'border-gray-300'
+                      }`}
                   />
                   {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
                 </div>
@@ -782,9 +777,8 @@ const API_URL = '/api';
                     value={formData.pincode}
                     onChange={handleChange}
                     required
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent ${
-                      errors.pincode ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent ${errors.pincode ? 'border-red-500' : 'border-gray-300'
+                      }`}
                   />
                   {errors.pincode && <p className="text-red-500 text-sm mt-1">{errors.pincode}</p>}
                 </div>
