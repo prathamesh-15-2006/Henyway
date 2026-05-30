@@ -4,6 +4,37 @@ import { ALLOWED_DELIVERY_AREAS, normalizeArea, isPincodeServiceable } from "../
 import { extractAreaFromGPS } from "./geocodingUtils.js";
 
 /**
+ * Helper to get current date/time adjusted to India Standard Time (GMT+5:30)
+ * @param {Date} [date] - Optional date object, defaults to now
+ * @returns {Object} - { hour, minute, day, month, year, istDate }
+ */
+export const getISTTime = (date = new Date()) => {
+  const istOffset = 5.5 * 60 * 60 * 1000; // India Standard Time (IST) offset is UTC + 5:30
+  const istDate = new Date(date.getTime() + istOffset);
+  
+  return {
+    hour: istDate.getUTCHours(),
+    minute: istDate.getUTCMinutes(),
+    day: istDate.getUTCDate(),
+    month: istDate.getUTCMonth(),
+    year: istDate.getUTCFullYear(),
+    istDate
+  };
+};
+
+/**
+ * Gets the Date object representing midnight IST (00:00:00) of a given date
+ * @param {Date} [date] - Optional date object, defaults to now
+ * @returns {Date} - Midnight IST Date object in UTC
+ */
+export const getMidnightIST = (date = new Date()) => {
+  const istOffset = 5.5 * 60 * 60 * 1000;
+  const istDate = new Date(date.getTime() + istOffset);
+  const midnightUTC = Date.UTC(istDate.getUTCFullYear(), istDate.getUTCMonth(), istDate.getUTCDate(), 0, 0, 0, 0);
+  return new Date(midnightUTC - istOffset);
+};
+
+/**
  * Basic delivery verification without GPS support
  * @param {Object} address - The delivery address object
  * @param {string} address.city - The city/area name
@@ -250,10 +281,10 @@ export const logUnsupportedArea = (area, coordinates = {}) => {
  */
 export const validateOrderTime = () => {
   const now = new Date();
-  const currentHour = now.getHours();
-  const currentMinute = now.getMinutes();
+  const istTime = getISTTime(now);
+  const currentHour = istTime.hour;
 
-  // Business hours: 9 AM to 9 PM
+  // Business hours: 9 AM to 9 PM IST
   const isWithinBusinessHours = currentHour >= 9 && currentHour < 21;
 
   if (isWithinBusinessHours) {
@@ -264,10 +295,10 @@ export const validateOrderTime = () => {
     };
   }
 
-  // Before 9 AM
+  // Before 9 AM IST (9:00 AM IST in UTC is 3:30 AM UTC today)
   if (currentHour < 9) {
     const nextAvailableTime = new Date(now);
-    nextAvailableTime.setHours(9, 0, 0, 0);
+    nextAvailableTime.setUTCHours(3, 30, 0, 0);
     return {
       canPlace: false,
       reason: "Orders will be delivered after 9:00 AM",
@@ -275,10 +306,10 @@ export const validateOrderTime = () => {
     };
   }
 
-  // After 9 PM
+  // After 9 PM IST (9:00 AM IST tomorrow in UTC is 3:30 AM UTC tomorrow)
   const nextAvailableTime = new Date(now);
-  nextAvailableTime.setDate(nextAvailableTime.getDate() + 1);
-  nextAvailableTime.setHours(9, 0, 0, 0);
+  nextAvailableTime.setUTCDate(nextAvailableTime.getUTCDate() + 1);
+  nextAvailableTime.setUTCHours(3, 30, 0, 0);
 
   return {
     canPlace: false,
@@ -319,10 +350,8 @@ export const validateScheduledDeliveryTime = (scheduledTime, orderTime = null) =
   const scheduled = new Date(scheduledTime);
 
   // Must be today only (same-day delivery)
-  const today = new Date(now);
-  today.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  const today = getMidnightIST(now);
+  const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
   if (scheduled < today || scheduled >= tomorrow) {
     return {
@@ -342,9 +371,8 @@ export const validateScheduledDeliveryTime = (scheduledTime, orderTime = null) =
     };
   }
 
-  // Must be before 9 PM
-  const maxTime = new Date(today);
-  maxTime.setHours(21, 0, 0, 0); // 9 PM
+  // Must be before 9 PM IST (which is 21 hours from midnight IST)
+  const maxTime = new Date(today.getTime() + 21 * 60 * 60 * 1000); // Midnight + 21 hours = 9 PM IST
 
   if (scheduled > maxTime) {
     return {
@@ -366,15 +394,13 @@ export const validateScheduledDeliveryTime = (scheduledTime, orderTime = null) =
  */
 export const getAvailableDeliverySlots = (orderTime = null) => {
   const now = orderTime || new Date();
-  const today = new Date(now);
-  today.setHours(0, 0, 0, 0);
+  const today = getMidnightIST(now);
 
   const slots = [];
   const minTime = new Date(now);
   minTime.setHours(minTime.getHours() + 1);
 
-  const maxTime = new Date(today);
-  maxTime.setHours(21, 0, 0, 0); // 9 PM
+  const maxTime = new Date(today.getTime() + 21 * 60 * 60 * 1000); // Midnight + 21 hours = 9 PM IST
 
   // Generate slots every 30 minutes
   let currentSlot = new Date(minTime);

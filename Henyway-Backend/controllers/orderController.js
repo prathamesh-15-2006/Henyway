@@ -10,7 +10,9 @@ import {
   logUnsupportedArea,
   validateOrderTime,
   calculateEstimatedDeliveryTime,
-  validateScheduledDeliveryTime
+  validateScheduledDeliveryTime,
+  getISTTime,
+  getMidnightIST
 } from "../utils/deliveryUtils.js";
 
 // Initialize Razorpay only when needed
@@ -99,29 +101,27 @@ export const createOrder = async (req, res) => {
 
     // Determine scheduled delivery date and slot based on current time
     const now = new Date();
-    const currentHour = now.getHours();
+    const istTime = getISTTime(now);
+    const currentHour = istTime.hour;
     let scheduledDeliveryDate;
     let scheduledDeliverySlot;
     let isSameDayDelivery = true;
 
-    // Case A: Time 9 AM – 9 PM - Allow same-day delivery
+    // Case A: Time 9 AM – 9 PM IST - Allow same-day delivery
     if (currentHour >= 9 && currentHour < 21) {
-      scheduledDeliveryDate = new Date(now);
-      scheduledDeliveryDate.setHours(0, 0, 0, 0); // Today
+      scheduledDeliveryDate = getMidnightIST(now);
       scheduledDeliverySlot = "ASAP"; // Default slot
     }
-    // Case B: Time After 9 PM - Force tomorrow delivery
+    // Case B: Time After 9 PM IST - Force tomorrow delivery
     else if (currentHour >= 21) {
-      scheduledDeliveryDate = new Date(now);
-      scheduledDeliveryDate.setDate(scheduledDeliveryDate.getDate() + 1);
-      scheduledDeliveryDate.setHours(0, 0, 0, 0); // Tomorrow
+      const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      scheduledDeliveryDate = getMidnightIST(tomorrow);
       scheduledDeliverySlot = "9:00 AM - 9:00 PM"; // Default slot for tomorrow
       isSameDayDelivery = false;
     }
-    // Case C: Time Before 9 AM - Allow today delivery starting from 9 AM
+    // Case C: Time Before 9 AM IST - Allow today delivery starting from 9 AM
     else {
-      scheduledDeliveryDate = new Date(now);
-      scheduledDeliveryDate.setHours(0, 0, 0, 0); // Today
+      scheduledDeliveryDate = getMidnightIST(now);
       scheduledDeliverySlot = "9:00 AM - 9:00 PM"; // Default slot
     }
 
@@ -693,7 +693,8 @@ export const startDelivery = async (req, res) => {
 
     // Backend checks: Current time must be within 9 AM – 9 PM
     const now = new Date();
-    const currentHour = now.getHours();
+    const istTime = getISTTime(now);
+    const currentHour = istTime.hour;
     if (currentHour < 9 || currentHour >= 21) {
       return res.status(400).json({
         success: false,
@@ -703,12 +704,12 @@ export const startDelivery = async (req, res) => {
     }
 
     // Current date must match scheduled delivery date
-    const today = new Date(now);
-    today.setHours(0, 0, 0, 0);
+    const todayMidnight = getMidnightIST(now);
     const scheduledDate = new Date(order.scheduledDeliveryDate);
-    scheduledDate.setHours(0, 0, 0, 0);
+    const todayTime = todayMidnight.getTime();
+    const scheduledTimeVal = getMidnightIST(scheduledDate).getTime();
 
-    if (today.getTime() !== scheduledDate.getTime()) {
+    if (todayTime !== scheduledTimeVal) {
       return res.status(400).json({
         success: false,
         message: "Pickup can only happen on the scheduled delivery date",
