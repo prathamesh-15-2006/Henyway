@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Package, ShoppingBag, TrendingUp, Plus, Edit2, Trash2, X, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { createProduct, getAllProducts, deleteProduct, updateProduct, BASE_URL } from '../../Services/Product-api';
+import { createProduct, getAllProducts, deleteProduct, updateProduct } from '../../Services/Product-api';
 import { getAllAdminOrders, updateOrderStatus, getOrder } from '../../Services/Order-api';
 import { getAllIssues, resolveIssue, Issue } from '../../Services/OrderIssues-api';
 import { Box, Button, TextField, Typography, Modal, Alert, FormControl, InputLabel, Select, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';

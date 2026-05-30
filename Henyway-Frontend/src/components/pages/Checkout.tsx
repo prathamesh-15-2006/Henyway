@@ -8,7 +8,7 @@ import { ShippingAddress } from '../types';
 import { motion } from 'framer-motion';
 import { createOrder, updateOrderAddress, createRazorpayOrder, verifyPayment } from '../../Services/Order-api';
 import { getProfile } from '../../Services/Auth-api';
-import { apiConfig } from '../../Services/api-config';
+import { checkPincodeEligibility } from '../../Services/Delivery-api';
 
 export const Checkout = () => {
   const { cart, cartTotal, clearCart } = useCart();
@@ -326,28 +326,10 @@ export const Checkout = () => {
     setLoading(true);
     try {
       // Step 0: Verify Delivery Eligibility
-      const API_URL = `${apiConfig.getBaseUrl()}/api`;
+      const verifyData = await checkPincodeEligibility(formData.pincode, formData.address);
 
-      const verifyResponse = await fetch(`${API_URL}/delivery/check-pincode`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          address: formData.address,
-          pincode: formData.pincode
-        }),
-      });
-
-      const verifyData = await verifyResponse.json();
-
-      if (verifyData.success && !verifyData.data.eligible) {
-        setPopupMessage(verifyData.data.reason || 'Sorry, we currently do not deliver to this pincode');
-        setShowPopup(true);
-        setLoading(false);
-        return;
-      } else if (!verifyData.success) {
-        setPopupMessage(verifyData.message || 'Failed to verify delivery eligibility');
+      if (!verifyData.eligible) {
+        setPopupMessage(verifyData.reason || 'Sorry, we currently do not deliver to this pincode');
         setShowPopup(true);
         setLoading(false);
         return;
@@ -433,9 +415,9 @@ export const Checkout = () => {
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Order creation failed:', error);
-      setPopupMessage('Failed to create order. Please try again.');
+      setPopupMessage(error.message || 'Failed to create order. Please try again.');
       setShowPopup(true);
     } finally {
       setLoading(false);

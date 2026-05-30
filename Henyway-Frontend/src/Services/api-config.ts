@@ -18,8 +18,8 @@ if (isDevelopment) {
   BASE_URL = LOCAL_API_URL || 'http://localhost:5000';
   console.log('🔧 Using LOCAL API:', BASE_URL);
 } else {
-  // In production, use production backend with fallback to local
-  BASE_URL = PRODUCTION_API_URL || 'http://localhost:5000';
+  // In production, use production backend with fallback to live Render backend
+  BASE_URL = PRODUCTION_API_URL || 'https://henway-backend.onrender.com';
   console.log('🚀 Using PRODUCTION API:', BASE_URL);
 }
 

@@ -1,8 +1,4 @@
-import { apiConfig } from './api-config';
-
-const BASE_URL = apiConfig.getBaseUrl();
-
-
+import api from './api';
 
 interface SignupData {
   name: string;
@@ -28,222 +24,115 @@ interface ResetPasswordData {
   password: string;
 }
 
-class ApiError extends Error {
-  response?: Response;
-  data?: any;
-
-  constructor(message: string, response?: Response, data?: any) {
-    super(message);
-    this.response = response;
-    this.data = data;
+export const signup = async (data: SignupData): Promise<any> => {
+  try {
+    const response = await api.post('/api/auth/signup', data);
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Signup failed';
+    throw new Error(message);
   }
-}
-
-export const signup = async (data: SignupData) => {
-  const response = await fetch(`${BASE_URL}/api/auth/signup`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    mode: 'cors',
-    body: JSON.stringify(data),
-  });
-
-  // Safely parse JSON
-  const text = await response.text();
-  const result = text ? JSON.parse(text) : {};
-
-  if (!response.ok) {
-    throw new ApiError(result.message || 'Signup failed', response, result);
-  }
-  return result;
 };
 
 /**
  * Verifies the OTP for registration.
- * @param email - The user's email address.
- * @param otp - The OTP sent to the user.
+ * @param data - The OTP verification data including email and otp.
  */
-export const verifyOtp = async (data: VerifyOtpData) => {
-  const response = await fetch(`${BASE_URL}/api/auth/verify-otp`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    mode: 'cors',
-    body: JSON.stringify(data),
-  });
-
-  // Safely parse JSON
-  const text = await response.text();
-  const result = text ? JSON.parse(text) : {};
-
-  if (!response.ok) {
-    throw new ApiError(result.message || 'OTP verification failed', response, result);
+export const verifyOtp = async (data: VerifyOtpData): Promise<any> => {
+  try {
+    const response = await api.post('/api/auth/verify-otp', data);
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'OTP verification failed';
+    throw new Error(message);
   }
-  return result;
 };
 
 /**
  * Resends the OTP to the user's email.
  * @param email - The user's email address.
  */
-export const resendOtp = async (email: string) => {
-  const response = await fetch(`${BASE_URL}/api/auth/resend-otp`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    mode: 'cors',
-    body: JSON.stringify({ email }),
-  });
-
-  // Safely parse JSON
-  const text = await response.text();
-  const result = text ? JSON.parse(text) : {};
-
-  if (!response.ok) {
-    throw new ApiError(result.message || 'Resend OTP failed', response, result);
+export const resendOtp = async (email: string): Promise<any> => {
+  try {
+    const response = await api.post('/api/auth/resend-otp', { email });
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Resend OTP failed';
+    throw new Error(message);
   }
-  return result;
 };
 
-export const login = async (data: LoginData) => {
-  const response = await fetch(`${BASE_URL}/api/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    mode: 'cors',
-    body: JSON.stringify(data),
-  });
-
-  // Safely parse JSON
-  const text = await response.text();
-  const result = text ? JSON.parse(text) : {};
-
-  if (!response.ok) {
-    throw new ApiError(result.message || 'Login failed', response, result);
+export const login = async (data: LoginData): Promise<any> => {
+  try {
+    const response = await api.post('/api/auth/login', data);
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Login failed';
+    throw new Error(message);
   }
-  return result;
 };
 
-export const forgotPassword = async (data: ForgotPasswordData) => {
-  const response = await fetch(`${BASE_URL}/api/auth/forgot-password`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    mode: 'cors',
-    body: JSON.stringify(data),
-  });
-
-  // Safely parse JSON
-  const text = await response.text();
-  const result = text ? JSON.parse(text) : {};
-
-  if (!response.ok) {
-    throw new ApiError(result.message || 'Forgot password failed', response, result);
+export const forgotPassword = async (data: ForgotPasswordData): Promise<any> => {
+  try {
+    const response = await api.post('/api/auth/forgot-password', data);
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Forgot password failed';
+    throw new Error(message);
   }
-  return result;
 };
 
-export const resetPassword = async (token: string, data: ResetPasswordData) => {
-  const response = await fetch(`${BASE_URL}/api/auth/reset-password/${token}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    mode: 'cors',
-    body: JSON.stringify(data),
-  });
-
-  // Safely parse JSON
-  const text = await response.text();
-  const result = text ? JSON.parse(text) : {};
-
-  if (!response.ok) {
-    throw new ApiError(result.message || 'Reset password failed', response, result);
+export const resetPassword = async (token: string, data: ResetPasswordData): Promise<any> => {
+  try {
+    const response = await api.post(`/api/auth/reset-password/${token}`, data);
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Reset password failed';
+    throw new Error(message);
   }
-  return result;
 };
 
-export const getProfile = async () => {
+export const getProfile = async (): Promise<any> => {
   const token = localStorage.getItem('token');
   if (!token) {
     throw new Error('Authentication token not found. Please log in.');
   }
 
-  console.log('Using token:', token.substring(0, 20) + '...'); // Debug log
-
-  const response = await fetch(`${BASE_URL}/api/profile`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    mode: 'cors',
-  });
-
-  // Safely parse JSON
-  if (!response.ok) {
-    const text = await response.text();
-    const result = text ? JSON.parse(text) : {};
-    console.error('Profile fetch failed:', result); // Debug log
-    throw new ApiError(result.message || 'Failed to fetch profile data.', response, result);
+  try {
+    const response = await api.get('/api/profile');
+    return response.data || {};
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Failed to fetch profile data.';
+    throw new Error(message);
   }
-
-  // Handle cases where the response might be successful but have no body
-  return response.status === 204 ? {} : response.json();
 };
 
-export const updateProfile = async (data: { phone?: string; address?: any }) => {
+export const updateProfile = async (data: { phone?: string; address?: any }): Promise<any> => {
   const token = localStorage.getItem('token');
   if (!token) {
     throw new Error('Authentication token not found. Please log in.');
   }
 
-  const response = await fetch(`${BASE_URL}/api/profile`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    mode: 'cors',
-    body: JSON.stringify(data),
-  });
-
-  // Safely parse JSON
-  const text = await response.text();
-  const result = text ? JSON.parse(text) : {};
-
-  if (!response.ok) {
-    throw new ApiError(result.message || 'Update profile failed', response, result);
+  try {
+    const response = await api.put('/api/profile', data);
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Update profile failed';
+    throw new Error(message);
   }
-  return result;
 };
 
-export const logout = async () => {
+export const logout = async (): Promise<any> => {
   const token = localStorage.getItem('token');
   if (!token) {
     throw new Error('Authentication token not found. Please log in.');
   }
 
-  const response = await fetch(`${BASE_URL}/api/auth/logout`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    mode: 'cors',
-  });
-
-  // Safely parse JSON
-  const text = await response.text();
-  const result = text ? JSON.parse(text) : {};
-
-  if (!response.ok) {
-    throw new ApiError(result.message || 'Logout failed', response, result);
+  try {
+    const response = await api.post('/api/auth/logout');
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Logout failed';
+    throw new Error(message);
   }
-  return result;
 };

@@ -1,7 +1,4 @@
-import { apiConfig } from './api-config';
-
-const BASE_URL = apiConfig.getBaseUrl();
-
+import api from './api';
 
 interface CoordinatesEligibilityResponse {
   success: boolean;
@@ -52,88 +49,53 @@ interface ServiceableAreasResponse {
   };
 }
 
-class ApiError extends Error {
-  response?: Response;
-  data?: any;
-
-  constructor(message: string, response?: Response, data?: any) {
-    super(message);
-    this.response = response;
-    this.data = data;
-  }
-}
-
 /**
  * Checks delivery eligibility based on coordinates
  * @param latitude - The latitude of the location
  * @param longitude - The longitude of the location
  */
 export const checkCoordinatesEligibility = async (latitude: number, longitude: number): Promise<CoordinatesEligibilityResponse['data']> => {
-  const response = await fetch(`${BASE_URL}/api/delivery/check-coordinates?latitude=${latitude}&longitude=${longitude}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    mode: 'cors',
-  });
-
-  // Safely parse JSON
-  const text = await response.text();
-  const result = text ? JSON.parse(text) : {};
-
-  if (!response.ok) {
-    throw new ApiError(result.message || 'Failed to check coordinates eligibility', response, result);
+  try {
+    const response = await api.get(`/api/delivery/check-coordinates`, {
+      params: { latitude, longitude }
+    });
+    const resData = response.data as any;
+    return resData.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Failed to check coordinates eligibility';
+    throw new Error(message);
   }
-
-  return result.data;
 };
 
 /**
- * Checks delivery eligibility based on pincode
+ * Checks delivery eligibility based on pincode and address
  * @param pincode - The pincode to verify
+ * @param address - The full address text to verify
  */
-export const checkPincodeEligibility = async (pincode: string): Promise<PincodeEligibilityResponse['data']> => {
-  const response = await fetch(`${BASE_URL}/api/delivery/check-pincode`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    mode: 'cors',
-    body: JSON.stringify({ pincode }),
-  });
-
-  // Safely parse JSON
-  const text = await response.text();
-  const result = text ? JSON.parse(text) : {};
-
-  if (!response.ok) {
-    throw new ApiError(result.message || 'Failed to check pincode eligibility', response, result);
+export const checkPincodeEligibility = async (pincode: string, address?: string): Promise<PincodeEligibilityResponse['data']> => {
+  try {
+    const finalAddress = address || pincode;
+    const response = await api.post(`/api/delivery/check-pincode`, { pincode, address: finalAddress });
+    const resData = response.data as any;
+    return resData.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Failed to check pincode eligibility';
+    throw new Error(message);
   }
-
-  return result.data;
 };
 
 /**
  * Gets all serviceable areas and pincodes
  */
 export const getServiceableAreas = async (): Promise<ServiceableAreasResponse['data']> => {
-  const response = await fetch(`${BASE_URL}/api/delivery/areas`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    mode: 'cors',
-  });
-
-  // Safely parse JSON
-  const text = await response.text();
-  const result = text ? JSON.parse(text) : {};
-
-  if (!response.ok) {
-    throw new ApiError(result.message || 'Failed to get serviceable areas', response, result);
+  try {
+    const response = await api.get(`/api/delivery/areas`);
+    const resData = response.data as any;
+    return resData.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Failed to get serviceable areas';
+    throw new Error(message);
   }
-
-  return result.data;
 };
 
 /**
@@ -141,22 +103,12 @@ export const getServiceableAreas = async (): Promise<ServiceableAreasResponse['d
  * @param address - The address to verify
  */
 export const verifyAddressEligibility = async (address: string): Promise<AddressEligibilityResponse['data']> => {
-  const response = await fetch(`${BASE_URL}/api/delivery/verify-address`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    mode: 'cors',
-    body: JSON.stringify({ address }),
-  });
-
-  // Safely parse JSON
-  const text = await response.text();
-  const result = text ? JSON.parse(text) : {};
-
-  if (!response.ok) {
-    throw new ApiError(result.message || 'Failed to verify address eligibility', response, result);
+  try {
+    const response = await api.post(`/api/delivery/verify-address`, { address });
+    const resData = response.data as any;
+    return resData.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Failed to verify address eligibility';
+    throw new Error(message);
   }
-
-  return result.data;
 };

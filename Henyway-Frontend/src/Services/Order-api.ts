@@ -1,8 +1,6 @@
-import { apiConfig } from './api-config';
+import api from './api';
 
-const BASE_URL = apiConfig.getBaseUrl();
-
-interface Address {
+export interface Address {
   name: string;
   phone: string;
   email: string;
@@ -14,14 +12,14 @@ interface Address {
   source: 'AUTO' | 'MANUAL';
 }
 
-interface OrderItem {
+export interface OrderItem {
   productId: string;
   quantity: number;
   price: number;
   name: string;
 }
 
-interface OrderData {
+export interface OrderData {
   orderId: string;
   userId?: string;
   guestId?: string;
@@ -35,7 +33,7 @@ interface OrderData {
   updatedAt: string;
 }
 
-interface RazorpayOrderData {
+export interface RazorpayOrderData {
   orderId: string;
   razorpayOrderId: string;
   amount: number;
@@ -43,198 +41,93 @@ interface RazorpayOrderData {
   key: string;
 }
 
-interface PaymentVerificationData {
+export interface PaymentVerificationData {
   orderId: string;
   razorpayOrderId: string;
   razorpayPaymentId: string;
   razorpaySignature: string;
 }
 
-class ApiError extends Error {
-  response?: Response;
-  data?: any;
-
-  constructor(message: string, response?: Response, data?: any) {
-    super(message);
-    this.response = response;
-    this.data = data;
+export const createOrder = async (_token: string): Promise<any> => {
+  try {
+    const response = await api.post('/api/orders/create');
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Create order failed';
+    throw new Error(message);
   }
-}
-
-export const createOrder = async (token: string) => {
-  const response = await fetch(`${BASE_URL}/api/orders/create`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    try {
-      const errorJson = JSON.parse(errorText);
-      throw new ApiError(errorJson.message || 'Create order failed', response, errorJson);
-    } catch (e) {
-      throw new ApiError(errorText || 'Create order failed', response, errorText);
-    }
-  }
-
-  return response.json();
 };
 
-export const updateOrderAddress = async (orderId: string, address: Address, token: string) => {
-  const response = await fetch(`${BASE_URL}/api/orders/${orderId}/address`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify({ address }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    try {
-      const errorJson = JSON.parse(errorText);
-      throw new ApiError(errorJson.message || 'Update order address failed', response, errorJson);
-    } catch (e) {
-      throw new ApiError(errorText || 'Update order address failed', response, errorText);
-    }
+export const updateOrderAddress = async (orderId: string, address: any, _token: string): Promise<any> => {
+  try {
+    const response = await api.put(`/api/orders/${orderId}/address`, { address });
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Update order address failed';
+    throw new Error(message);
   }
-
-  return response.json();
 };
 
-export const createRazorpayOrder = async (orderId: string, token: string) => {
-  const response = await fetch(`${BASE_URL}/api/orders/${orderId}/razorpay`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    try {
-      const errorJson = JSON.parse(errorText);
-      throw new ApiError(errorJson.message || 'Create Razorpay order failed', response, errorJson);
-    } catch (e) {
-      throw new ApiError(errorText || 'Create Razorpay order failed', response, errorText);
-    }
+export const createRazorpayOrder = async (orderId: string, _token: string): Promise<any> => {
+  try {
+    const response = await api.post(`/api/orders/${orderId}/razorpay`);
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Create Razorpay order failed';
+    throw new Error(message);
   }
-
-  return response.json();
 };
 
-export const verifyPayment = async (paymentData: PaymentVerificationData, token: string) => {
-  const response = await fetch(`${BASE_URL}/api/orders/verify-payment`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify(paymentData),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    try {
-      const errorJson = JSON.parse(errorText);
-      throw new ApiError(errorJson.message || 'Payment verification failed', response, errorJson);
-    } catch (e) {
-      throw new ApiError(errorText || 'Payment verification failed', response, errorText);
-    }
+export const verifyPayment = async (paymentData: PaymentVerificationData, _token: string): Promise<any> => {
+  try {
+    const response = await api.post('/api/orders/verify-payment', paymentData);
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Payment verification failed';
+    throw new Error(message);
   }
-
-  return response.json();
 };
 
-export const getOrder = async (orderId: string, token?: string) => {
-  const headers: HeadersInit = {};
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+export const getOrder = async (orderId: string, _token?: string): Promise<any> => {
+  try {
+    const response = await api.get(`/api/orders/${orderId}`);
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Get order failed';
+    throw new Error(message);
   }
-
-  const response = await fetch(`${BASE_URL}/api/orders/${orderId}`, {
-    headers,
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    try {
-      const errorJson = JSON.parse(errorText);
-      throw new ApiError(errorJson.message || 'Get order failed', response, errorJson);
-    } catch (e) {
-      throw new ApiError(errorText || 'Get order failed', response, errorText);
-    }
-  }
-
-  return response.json();
 };
 
-export const getOrders = async (token: string) => {
-  const response = await fetch(`${BASE_URL}/api/orders`, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    try {
-      const errorJson = JSON.parse(errorText);
-      throw new ApiError(errorJson.message || 'Get orders failed', response, errorJson);
-    } catch (e) {
-      throw new ApiError(errorText || 'Get orders failed', response, errorText);
-    }
+export const getOrders = async (_token: string): Promise<any> => {
+  try {
+    const response = await api.get('/api/orders');
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Get orders failed';
+    throw new Error(message);
   }
-
-  return response.json();
 };
 
-export const getAllAdminOrders = async (token: string) => {
-  const response = await fetch(`${BASE_URL}/api/orders/admin/all`, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    try {
-      const errorJson = JSON.parse(errorText);
-      throw new ApiError(errorJson.message || 'Get admin orders failed', response, errorJson);
-    } catch (e) {
-      throw new ApiError(errorText || 'Get admin orders failed', response, errorText);
-    }
+export const getAllAdminOrders = async (_token: string): Promise<any> => {
+  try {
+    const response = await api.get('/api/orders/admin/all');
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Get admin orders failed';
+    throw new Error(message);
   }
-
-  return response.json();
 };
 
-export const updateOrderStatus = async (orderId: string, status?: string, deliveryStatus?: string, token?: string) => {
+export const updateOrderStatus = async (orderId: string, status?: string, deliveryStatus?: string, _token?: string): Promise<any> => {
   const body: any = {};
   if (status !== undefined) body.status = status;
   if (deliveryStatus !== undefined) body.deliveryStatus = deliveryStatus;
 
-  const response = await fetch(`${BASE_URL}/api/orders/${orderId}/status`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    try {
-      const errorJson = JSON.parse(errorText);
-      throw new ApiError(errorJson.message || 'Update order status failed', response, errorJson);
-    } catch (e) {
-      throw new ApiError(errorText || 'Update order status failed', response, errorText);
-    }
+  try {
+    const response = await api.put(`/api/orders/${orderId}/status`, body);
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Update order status failed';
+    throw new Error(message);
   }
-
-  return response.json();
 };

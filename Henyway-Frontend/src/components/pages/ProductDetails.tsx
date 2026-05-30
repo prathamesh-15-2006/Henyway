@@ -1,10 +1,11 @@
-mport { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Minus, Plus, Star, ArrowLeft, Check } from 'lucide-react';
-import { products } from '../data/mockData';
 import { useCart } from '../context/CartContext';
 import { ProductCard } from '../ProductCard';
 import { motion } from 'framer-motion';
+import { getProductById, getAllProductsPublic } from '../../Services/Product-api';
+import { Product as ProductCardType } from '../types';
 
 export const ProductDetails = () => {
   const { id } = useParams();
@@ -224,16 +225,16 @@ export const ProductDetails = () => {
               <div className="mb-6">
                 <span
                   className={`inline-block px-4 py-2 rounded-lg font-medium ${
-                    product.stock > 10
+                    (product.stock || 0) > 10
                       ? 'bg-green-100 text-green-700'
-                      : product.stock > 0
+                      : (product.stock || 0) > 0
                       ? 'bg-orange-100 text-orange-700'
                       : 'bg-red-100 text-red-700'
                   }`}
                 >
-                  {product.stock > 10
+                  {(product.stock || 0) > 10
                     ? 'In Stock'
-                    : product.stock > 0
+                    : (product.stock || 0) > 0
                     ? `Only ${product.stock} left!`
                     : 'Out of Stock'}
                 </span>
@@ -254,9 +255,9 @@ export const ProductDetails = () => {
                       {quantity}
                     </span>
                     <button
-                      onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                      onClick={() => setQuantity(Math.min(product.stock || 0, quantity + 1))}
                       className="p-3 hover:bg-gray-100 transition-colors"
-                      disabled={quantity >= product.stock}
+                      disabled={quantity >= (product.stock || 0)}
                     >
                       <Plus className="w-5 h-5" />
                     </button>

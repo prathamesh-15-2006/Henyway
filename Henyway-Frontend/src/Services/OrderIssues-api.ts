@@ -1,6 +1,4 @@
-import { apiConfig } from './api-config';
-
-export const BASE_URL = apiConfig.getBaseUrl();
+import api from './api';
 
 export interface Issue {
   id: string;
@@ -46,119 +44,60 @@ export interface ResolveIssueResponse {
   data: Issue;
 }
 
-class ApiError extends Error {
-  response?: Response;
-  data?: any;
-
-  constructor(message: string, response?: Response, data?: any) {
-    super(message);
-    this.response = response;
-    this.data = data;
-  }
-}
-
-export const submitIssue = async (issueData: SubmitIssueRequest, token: string): Promise<SubmitIssueResponse> => {
-  const response = await fetch(`${BASE_URL}/api/order-issues`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify(issueData),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    try {
-      const errorJson = JSON.parse(errorText);
-      throw new ApiError(errorJson.message || 'Submit issue failed', response, errorJson);
-    } catch (e) {
-      throw new ApiError(errorText || 'Submit issue failed', response, errorText);
+export const submitIssue = async (issueData: SubmitIssueRequest, _token: string): Promise<SubmitIssueResponse> => {
+  try {
+    const response = await api.post('/api/order-issues', issueData);
+    const json = response.data as any;
+    if (json.success && json.data) {
+      json.data.id = json.data._id;
     }
+    return json;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Submit issue failed';
+    throw new Error(message);
   }
-
-  const json = await response.json();
-  if (json.success && json.data) {
-    json.data.id = json.data._id;
-  }
-  return json;
 };
 
-export const getIssueStatus = async (orderId: string, token: string): Promise<GetIssueStatusResponse> => {
-  const response = await fetch(`${BASE_URL}/api/order-issues/order/${orderId}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    try {
-      const errorJson = JSON.parse(errorText);
-      throw new ApiError(errorJson.message || 'Get issue status failed', response, errorJson);
-    } catch (e) {
-      throw new ApiError(errorText || 'Get issue status failed', response, errorText);
+export const getIssueStatus = async (orderId: string, _token: string): Promise<GetIssueStatusResponse> => {
+  try {
+    const response = await api.get(`/api/order-issues/order/${orderId}`);
+    const json = response.data as any;
+    if (json.success && json.data) {
+      json.data.id = json.data._id;
     }
+    return json;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Get issue status failed';
+    throw new Error(message);
   }
-
-  const json = await response.json();
-  if (json.success && json.data) {
-    json.data.id = json.data._id;
-  }
-  return json;
 };
 
-export const getAllIssues = async (token: string): Promise<GetAllIssuesResponse> => {
-  const response = await fetch(`${BASE_URL}/api/order-issues`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    try {
-      const errorJson = JSON.parse(errorText);
-      throw new ApiError(errorJson.message || 'Get all issues failed', response, errorJson);
-    } catch (e) {
-      throw new ApiError(errorText || 'Get all issues failed', response, errorText);
+export const getAllIssues = async (_token: string): Promise<GetAllIssuesResponse> => {
+  try {
+    const response = await api.get('/api/order-issues');
+    const json = response.data as any;
+    if (json.success && json.data && Array.isArray(json.data)) {
+      json.data = json.data.map((issue: any) => ({ ...issue, id: issue._id }));
+    } else if (json.success && !json.data) {
+      json.data = [];
     }
+    return json;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Get all issues failed';
+    throw new Error(message);
   }
-
-  const json = await response.json();
-  if (json.success && json.data && Array.isArray(json.data)) {
-    json.data = json.data.map((issue: any) => ({ ...issue, id: issue._id }));
-  } else if (json.success && !json.data) {
-    json.data = [];
-  }
-  return json;
 };
 
-export const resolveIssue = async (issueId: string, resolveData: ResolveIssueRequest, token: string): Promise<ResolveIssueResponse> => {
-  const response = await fetch(`${BASE_URL}/api/order-issues/${issueId}/resolve`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify(resolveData),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    try {
-      const errorJson = JSON.parse(errorText);
-      throw new ApiError(errorJson.message || 'Resolve issue failed', response, errorJson);
-    } catch (e) {
-      throw new ApiError(errorText || 'Resolve issue failed', response, errorText);
+export const resolveIssue = async (issueId: string, resolveData: ResolveIssueRequest, _token: string): Promise<ResolveIssueResponse> => {
+  try {
+    const response = await api.patch(`/api/order-issues/${issueId}/resolve`, resolveData);
+    const json = response.data as any;
+    if (json.success && json.data) {
+      json.data.id = json.data._id;
     }
+    return json;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Resolve issue failed';
+    throw new Error(message);
   }
-
-  const json = await response.json();
-  if (json.success && json.data) {
-    json.data.id = json.data._id;
-  }
-  return json;
 };
