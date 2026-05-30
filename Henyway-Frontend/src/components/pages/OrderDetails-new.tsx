@@ -285,18 +285,17 @@ export const OrderDetails = () => {
               <button
                 onClick={() => setShowIssueModal(true)}
                 disabled={!!issue || isSupportDisabled()}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                  issue || isSupportDisabled()
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-amber-600 text-white hover:bg-amber-700'
-                }`}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${issue || isSupportDisabled()
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-amber-600 text-white hover:bg-amber-700'
+                  }`}
               >
                 <MessageSquare className="w-5 h-5" />
                 <span>Report an Issue</span>
               </button>
 
               <a
-                href="https://wa.me/1234567890"
+                href="https://wa.me/9370439566"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -306,7 +305,7 @@ export const OrderDetails = () => {
               </a>
 
               <a
-                href="tel:+1234567890"
+                href="tel:+9370439566"
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <Phone className="w-5 h-5" />

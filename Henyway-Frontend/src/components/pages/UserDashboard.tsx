@@ -25,7 +25,7 @@ interface Address {
 }
 
 export const UserDashboard = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'orders' | 'profile'>('orders');
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -63,7 +63,7 @@ export const UserDashboard = () => {
         const userProfile = responseData.user || responseData;
         setProfile(userProfile);
         setUsername(userProfile.username || '');
-        setPhone(userProfile.mobile || '');
+        setPhone(userProfile.phone || userProfile.mobile || '');
         if (userProfile.address) {
           setAddress({
             name: userProfile.address.name || '',
@@ -220,7 +220,13 @@ export const UserDashboard = () => {
       const userProfile = responseData.user || responseData;
       setProfile(userProfile);
       setUsername(userProfile.username || '');
-      setPhone(userProfile.mobile || '');
+      setPhone(userProfile.phone || userProfile.mobile || '');
+
+      // Sync updated profile to AuthContext & localStorage to persist across refreshes
+      updateUser({
+        name: userProfile.username || '',
+        mobile: userProfile.phone || userProfile.mobile || '',
+      });
       if (userProfile.address) {
         setAddress({
           name: userProfile.address.name || '',

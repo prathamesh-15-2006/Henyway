@@ -6,6 +6,7 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  updateUser: (updatedUser: Partial<User>) => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
 }
@@ -53,12 +54,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('cart');
   };
 
+  const updateUser = (updatedUser: Partial<User>) => {
+    setUser(prevUser => {
+      if (!prevUser) return null;
+      const newUser = { ...prevUser, ...updatedUser };
+      localStorage.setItem('user', JSON.stringify(newUser));
+      return newUser;
+    });
+  };
+
   return (
     <AuthContext.Provider
       value={{
         user,
         login,
         logout,
+        updateUser,
         isAuthenticated: !!user,
         isAdmin: user?.role === 'admin',
       }}

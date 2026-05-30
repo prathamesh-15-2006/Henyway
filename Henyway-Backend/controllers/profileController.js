@@ -1,4 +1,5 @@
 import Profile from "../models/Profile.js";
+import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
 // -----------------------------
@@ -70,7 +71,10 @@ export const updateProfile = async (req, res) => {
         const { username, phone, address } = req.body;
 
         if (username !== undefined && username.trim()) {
-            profile.username = username.trim();
+            const trimmedUsername = username.trim();
+            profile.username = trimmedUsername;
+            // ALSO update the parent User model's name to prevent resets on session refresh/re-login
+            await User.findByIdAndUpdate(decoded.id, { name: trimmedUsername });
         }
 
         if (phone !== undefined) {

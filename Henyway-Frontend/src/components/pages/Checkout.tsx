@@ -103,7 +103,7 @@ export const Checkout = () => {
 
         setFormData({
           fullName: userProfile.username || user?.name || '',
-          mobile: userProfile.mobile || user?.mobile || '',
+          mobile: userProfile.phone || userProfile.mobile || user?.mobile || '',
           address: userProfile.address?.addressLine || '',
           city: userProfile.address?.city || 'Pune',
           state: userProfile.address?.state || 'Maharashtra',
