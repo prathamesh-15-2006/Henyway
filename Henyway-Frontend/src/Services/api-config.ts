@@ -19,7 +19,7 @@ if (isDevelopment) {
   console.log('🔧 Using LOCAL API:', BASE_URL);
 } else {
   // In production, use production backend with fallback to live Render backend
-  BASE_URL = PRODUCTION_API_URL || 'https://henway-backend.onrender.com';
+  BASE_URL = PRODUCTION_API_URL || 'https://henyway.onrender.com';
   console.log('🚀 Using PRODUCTION API:', BASE_URL);
 }
 
@@ -28,7 +28,7 @@ if (isDevelopment) {
  */
 export const apiConfig = {
   // Primary URLs
-  PRODUCTION_API_URL: PRODUCTION_API_URL || 'https://henway-backend.onrender.com',
+  PRODUCTION_API_URL: PRODUCTION_API_URL || 'https://henyway.onrender.com',
   LOCAL_API_URL: LOCAL_API_URL || 'http://localhost:5000',
 
   // Current active URL

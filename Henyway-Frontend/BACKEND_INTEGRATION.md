@@ -136,26 +136,7 @@ Create `src/services/api.ts`:
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-// const API_BASE_URL = import.meta.env.VITE_API_URL ||  'https://henway-backend.onrender.com';
-
-
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-export default api;
+// const API_BASE_URL = import.meta.env.VITE_API_URL ||  'https://henyway.onrender.com';
 ```
 
 #### Step 2: Update Context Providers
@@ -178,7 +159,7 @@ Update components to fetch from API:
 Add to `.env`:
 ```
 VITE_API_URL=http://localhost:5000/api
-<!-- VITE_API_URL=https://henway-backend.onrender.com -->
+<!-- VITE_API_URL=https://henyway.onrender.com -->
 
 ```
 

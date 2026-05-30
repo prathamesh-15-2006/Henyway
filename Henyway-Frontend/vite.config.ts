@@ -11,7 +11,7 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:5000',
-        // target: 'https://henway-backend.onrender.com',
+        // target: 'https://henyway.onrender.com',
 
         changeOrigin: true,
       },
